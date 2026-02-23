@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SleepGuard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Source Sans 3',sans-serif;font-size:14px;background:#ecf0f5;color:#333}
+
+  .main-navbar{
+    background:#343a40;
+    padding:0 16px;
+    height:50px;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 1px 4px rgba(0,0,0,.3);
+    position:sticky;top:0;z-index:100;
+  }
+  .navbar-brand{color:#fff;font-size:1.15em;font-weight:700;display:flex;align-items:center;gap:8px;text-decoration:none}
+  .navbar-brand i{color:#3c8dbc;font-size:1.2em}
+  .navbar-right{display:flex;align-items:center;gap:12px}
+  .nav-badge{background:#3c8dbc;color:#fff;border-radius:10px;font-size:.7em;
+             padding:2px 8px;font-weight:600;display:flex;align-items:center;gap:4px}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:#00a65a;
+            display:inline-block;animation:blink 1.4s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+  .wrapper{display:flex;min-height:calc(100vh - 50px)}
+
+  .sidebar{
+    width:230px;min-width:230px;background:#222d32;
+    display:flex;flex-direction:column;
+    box-shadow:2px 0 5px rgba(0,0,0,.2);
+  }
+  .sidebar-section{padding:12px 16px 6px;font-size:.68em;color:#8aa4af;
+                   text-transform:uppercase;letter-spacing:1.5px;font-weight:700}
+  .sidebar-item{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 16px;color:#b8c7ce;text-decoration:none;
+    border-left:3px solid transparent;font-size:.92em;cursor:default;
+    transition:background .15s,border-color .15s;
+  }
+  .sidebar-item:hover{background:#1e282c;color:#fff}
+  .sidebar-item.active{background:#1e282c;border-left-color:#3c8dbc;color:#fff}
+  .sidebar-item i{width:18px;text-align:center;font-size:1.05em}
+  .sidebar-divider{border:none;border-top:1px solid #374850;margin:6px 0}
+
+  .sidebar-ctrl{padding:10px 16px}
+  .sidebar-ctrl label{color:#8aa4af;font-size:.75em;text-transform:uppercase;
+                       letter-spacing:1px;display:block;margin-bottom:5px}
+  .sidebar-ctrl .val-badge{color:#3c8dbc;font-weight:700;float:right}
+  input[type=range]{-webkit-appearance:none;width:100%;height:4px;
+                    background:#374850;border-radius:3px;cursor:pointer;margin-top:4px}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;
+    border-radius:50%;background:#3c8dbc;box-shadow:0 0 4px #3c8dbc88}
+  .sidebar-hint{font-size:.7em;color:#556f7a;padding:4px 16px 10px;line-height:1.5}
+
+  .sidebar-btn{
+    display:block;margin:6px 16px;padding:7px 12px;border:none;border-radius:4px;
+    font-size:.85em;font-weight:600;cursor:pointer;text-align:center;width:calc(100% - 32px);
+    transition:filter .15s;
+  }
+  .btn-start{background:#3c8dbc;color:#fff}
+  .btn-stop {background:#dd4b39;color:#fff}
+  .btn-test {background:#00a65a;color:#fff;margin-top:2px}
+  .sidebar-btn:hover{filter:brightness(1.12)}
+
+  .content-wrap{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px;overflow:auto}
+
+  .vbox-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .vbox{
+    background:#fff;border-radius:4px;
+    box-shadow:0 1px 3px rgba(0,0,0,.12);
+    display:flex;overflow:hidden;
+    border-left:none;
+  }
+  .vbox-icon{
+    width:70px;display:flex;align-items:center;justify-content:center;
+    font-size:2em;flex-shrink:0;
+  }
+  .vbox-icon.blue  {background:#3c8dbc;color:#fff}
+  .vbox-icon.green {background:#00a65a;color:#fff}
+  .vbox-icon.red   {background:#dd4b39;color:#fff}
+  .vbox-icon.orange{background:#f39c12;color:#fff}
+  .vbox-body{padding:10px 14px;flex:1}
+  .vbox-val{font-size:1.7em;font-weight:700;line-height:1.1;color:#333}
+  .vbox-lbl{font-size:.78em;color:#999;text-transform:uppercase;letter-spacing:.5px}
+
+  .box{background:#fff;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.12);overflow:hidden}
+  .box-header{
+    padding:10px 14px;border-bottom:1px solid #f4f4f4;
+    display:flex;align-items:center;gap:8px;
+  }
+  .box-header h3{font-size:.95em;font-weight:700;margin:0;color:#444;flex:1}
+  .box-header i{color:#3c8dbc;font-size:1.1em}
+  .box-body{padding:14px}
+
+  #cam-feed{display:block;width:100%;border-radius:2px}
+
+  .eye-badge{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:8px 16px;border-radius:4px;font-weight:700;font-size:.95em;
+    width:100%;justify-content:center;transition:all .2s;
+  }
+  .eye-badge.open  {background:#dff0d8;color:#3c763d;border:1px solid #d6e9c6}
+  .eye-badge.closed{background:#f2dede;color:#a94442;border:1px solid #ebccd1;animation:flicker .5s infinite alternate}
+  .eye-badge.none  {background:#f9f9f9;color:#999;border:1px solid #eee}
+  @keyframes flicker{from{opacity:1}to{opacity:.65}}
+
+  .ring-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .ring-svg{width:110px;height:110px}
+  .rtrack{fill:none;stroke:#ecf0f5;stroke-width:10}
+  .rprog{fill:none;stroke:#3c8dbc;stroke-width:10;stroke-linecap:round;
+         transform:rotate(-90deg);transform-origin:50% 50%;
+         transition:stroke-dashoffset .15s,stroke .2s}
+  .rval{font-size:1.35em;font-weight:700;fill:#444;text-anchor:middle;dominant-baseline:central;
+        font-family:'Source Sans 3',sans-serif}
+  .rsub{font-size:.72em;color:#999}
+
+  .stat-table{width:100%;border-collapse:collapse;font-size:.88em}
+  .stat-table td{padding:7px 4px;border-bottom:1px solid #f4f4f4;color:#555}
+  .stat-table td:last-child{text-align:right;font-weight:700;color:#333}
+  .stat-table tr:last-child td{border-bottom:none}
+
+  #log{background:#f9f9f9;border:1px solid #eee;border-radius:3px;
+       padding:8px;height:90px;overflow-y:auto;font-size:.75em;
+       color:#888;line-height:1.75;font-family:'Courier New',monospace}
+  .lok{color:#00a65a}.lwarn{color:#f39c12}.lerr{color:#dd4b39}
+
+  .main-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+  .right-col{display:flex;flex-direction:column;gap:14px}
+
+  #alarm-screen{display:none;position:fixed;inset:0;z-index:9999;
+    background:rgba(0,0,0,.88);flex-direction:column;align-items:center;justify-content:center;gap:20px}
+  #alarm-screen.on{display:flex}
+  .alarm-header{text-align:center}
+  .alarm-header h2{font-size:2.5em;font-weight:700;color:#dd4b39;
+    animation:shake .35s infinite;text-shadow:0 0 20px #dd4b3999}
+  @keyframes shake{0%,100%{transform:translateX(0)}30%{transform:translateX(-6px)}70%{transform:translateX(6px)}}
+  .alarm-header p{color:#aaa;font-size:.85em;letter-spacing:2px;text-transform:uppercase;margin-top:6px}
+  #alarm-frame{width:min(700px,93vw);aspect-ratio:16/9;border:3px solid #dd4b39;border-radius:6px}
+  #btn-wake{padding:12px 36px;background:#00a65a;color:#fff;border:none;border-radius:4px;
+    font-size:1em;font-weight:700;cursor:pointer;letter-spacing:.5px}
+  #btn-wake:hover{background:#008d4c}
+
+  @media(max-width:860px){
+    .wrapper{flex-direction:column}
+    .sidebar{width:100%;flex-direction:row;flex-wrap:wrap;min-width:0}
+    .main-grid{grid-template-columns:1fr}
+    .vbox-row{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<nav class="main-navbar">
+  <a class="navbar-brand" href="#">
+    <i class="bi bi-shield-check"></i> SleepGuard
+  </a>
+  <div class="navbar-right">
+    <span class="nav-badge"><span class="live-dot"></span> EN VIVO</span>
+  </div>
+</nav>
+
+<div class="wrapper">
+
+  <aside class="sidebar">
+    <div class="sidebar-section">Navegación</div>
+
+    <a class="sidebar-item active">
+      <i class="bi bi-camera-video"></i> Monitor
+    </a>
+    <a class="sidebar-item">
+      <i class="bi bi-graph-up"></i> Estadísticas
+    </a>
+    <a class="sidebar-item">
+      <i class="bi bi-gear"></i> Configuración
+    </a>
+
+    <hr class="sidebar-divider">
+    <div class="sidebar-section">Sensibilidad</div>
+
+    <div class="sidebar-ctrl">
+      <label>Escala de detección <span class="val-badge" id="sv">1.15</span></label>
+      <input type="range" id="sl" min="1.05" max="1.40" step="0.05" value="1.15">
+    </div>
+    <div class="sidebar-hint">
+      ← más sensible &nbsp;|&nbsp; menos sensible →<br>
+      izquierda: menor sensibilidad
+    </div>
+
+    <hr class="sidebar-divider">
+    <div class="sidebar-section">Controles</div>
+
+    <button class="sidebar-btn btn-start" onclick="doStart()">
+      <i class="bi bi-play-fill"></i> Iniciar detección
+    </button>
+    <button class="sidebar-btn btn-stop" onclick="doStop()">
+      <i class="bi bi-stop-fill"></i> Detener
+    </button>
+    <button class="sidebar-btn btn-test" onclick="testAlarm()">
+      <i class="bi bi-bell-fill"></i> Probar alarma
+    </button>
+  </aside>
+
+  <main class="content-wrap">
+
+    <div class="vbox-row">
+      <div class="vbox">
+        <div class="vbox-icon blue"><i class="bi bi-person-bounding-box"></i></div>
+        <div class="vbox-body">
+          <div class="vbox-val" id="vb-face">—</div>
+          <div class="vbox-lbl">Rostro detectado</div>
+        </div>
+      </div>
+      <div class="vbox">
+        <div class="vbox-icon green"><i class="bi bi-eye"></i></div>
+        <div class="vbox-body">
+          <div class="vbox-val" id="vb-eyes">—</div>
+          <div class="vbox-lbl">Estado ocular</div>
+        </div>
+      </div>
+      <div class="vbox">
+        <div class="vbox-icon red"><i class="bi bi-bell"></i></div>
+        <div class="vbox-body">
+          <div class="vbox-val" id="vb-alerts">0</div>
+          <div class="vbox-lbl">Alertas totales</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-grid">
+
+      <div class="box">
+        <div class="box-header">
+          <i class="bi bi-camera-video-fill"></i>
+          <h3>Cámara en vivo</h3>
+        </div>
+        <div class="box-body" style="padding:0">
+          <img id="cam-feed" src="/video" alt="feed de cámara">
+        </div>
+      </div>
+
+      <div class="right-col">
+
+        <div class="box">
+          <div class="box-header">
+            <i class="bi bi-eye-fill"></i>
+            <h3>Estado ocular</h3>
+          </div>
+          <div class="box-body">
+            <div class="eye-badge none" id="eye-st">
+              <i class="bi bi-question-circle"></i> Buscando rostro…
+            </div>
+          </div>
+        </div>
+
+        <div class="box">
+          <div class="box-header">
+            <i class="bi bi-hourglass-split"></i>
+            <h3>Tiempo ojos cerrados</h3>
+          </div>
+          <div class="box-body">
+            <div class="ring-wrap">
+              <svg class="ring-svg" viewBox="0 0 110 110">
+                <circle class="rtrack" cx="55" cy="55" r="44"/>
+                <circle class="rprog" cx="55" cy="55" r="44"
+                  id="rprog" stroke-dasharray="276.5" stroke-dashoffset="276.5"/>
+                <text class="rval" x="55" y="55" id="rval">0.0s</text>
+              </svg>
+              <span class="rsub">alarma a los 2.5 s</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="box">
+          <div class="box-header">
+            <i class="bi bi-bar-chart-fill"></i>
+            <h3>Métricas</h3>
+          </div>
+          <div class="box-body">
+            <table class="stat-table">
+              <tr><td><i class="bi bi-person" style="color:#3c8dbc"></i> Rostro</td><td id="s-face">—</td></tr>
+              <tr><td><i class="bi bi-sliders" style="color:#3c8dbc"></i> Sensibilidad</td><td id="s-sens">1.15</td></tr>
+              <tr><td><i class="bi bi-bell" style="color:#3c8dbc"></i> Alertas</td><td id="s-alerts">0</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="box">
+          <div class="box-header">
+            <i class="bi bi-terminal-fill"></i>
+            <h3>Log del sistema</h3>
+          </div>
+          <div class="box-body">
+            <div id="log"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="alarm-screen">
+  <div class="alarm-header">
+    <h2>⚠ ¡DESPIERTA!</h2>
+    <p>somnolencia detectada · SleepGuard</p>
+  </div>
+  <iframe id="alarm-frame" src="about:blank"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen></iframe>
+  <button id="btn-wake" onclick="dismissAlarm()">
+    <i class="bi bi-check-lg"></i> Ya estoy despierto
+  </button>
+</div>
+
+<script>
+const LIMIT=2.5, CIRC=276.5;
+let alarming=false, pollId=null;
+
+const eyeSt   = document.getElementById('eye-st');
+const rprog   = document.getElementById('rprog');
+const rval    = document.getElementById('rval');
+const sFace   = document.getElementById('s-face');
+const sSens   = document.getElementById('s-sens');
+const sAlerts = document.getElementById('s-alerts');
+const vbFace  = document.getElementById('vb-face');
+const vbEyes  = document.getElementById('vb-eyes');
+const vbAlerts= document.getElementById('vb-alerts');
+const logEl   = document.getElementById('log');
+const alarmScr= document.getElementById('alarm-screen');
+const alarmFr = document.getElementById('alarm-frame');
+const sl      = document.getElementById('sl');
+const sv      = document.getElementById('sv');
+
+function log(msg, t=''){
+  const ts = new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const d  = document.createElement('div');
+  if(t) d.className='l'+t;
+  d.textContent = `[${ts}] ${msg}`;
+  logEl.appendChild(d);
+  logEl.scrollTop = logEl.scrollHeight;
+  while(logEl.children.length > 120) logEl.removeChild(logEl.firstChild);
+}
+
+sl.addEventListener('input', function(){
+  const v = parseFloat(this.value);
+  sv.textContent = v.toFixed(2);
+  fetch(`/set_sensitivity/${v}`, {method:'POST'}).then(()=>log(`Sensibilidad → ${v.toFixed(2)}`,'ok'));
+});
+
+async function pollState(){
+  let s;
+  try{ s = await fetch('/state').then(r=>r.json()); } catch(e){ return; }
+
+  vbFace.textContent = s.face_found ? 'Sí' : 'No';
+
+  if(!s.face_found){
+    eyeSt.className='eye-badge none';
+    eyeSt.innerHTML='<i class="bi bi-question-circle"></i> Buscando rostro…';
+    vbEyes.textContent='—';
+  } else if(s.eyes_open){
+    eyeSt.className='eye-badge open';
+    eyeSt.innerHTML='<i class="bi bi-eye-fill"></i> Ojos abiertos';
+    vbEyes.textContent='Abiertos';
+  } else {
+    eyeSt.className='eye-badge closed';
+    eyeSt.innerHTML='<i class="bi bi-eye-slash-fill"></i> Ojos cerrados';
+    vbEyes.textContent='Cerrados';
+  }
+
+  const sec  = s.closed_sec || 0;
+  const ratio= Math.min(1, sec/LIMIT);
+  rprog.style.strokeDashoffset = CIRC*(1-ratio);
+  rprog.style.stroke = ratio>.7 ? '#dd4b39' : ratio>.4 ? '#f39c12' : '#3c8dbc';
+  rval.textContent   = sec.toFixed(1)+'s';
+
+  sFace.textContent   = s.face_found ? '✓ detectado' : '✗ no encontrado';
+  sFace.style.color   = s.face_found ? '#00a65a' : '#dd4b39';
+  sSens.textContent   = (s.sensitivity||1.15).toFixed(2);
+  sAlerts.textContent = s.alerts;
+  vbAlerts.textContent= s.alerts;
+
+  if(s.alarm && !alarming) triggerAlarm();
+}
+
+function triggerAlarm(){
+  if(alarming) return;
+  alarming=true;
+  log('¡ALARMA activada!','err');
+  alarmFr.src='https://www.youtube.com/embed/9L-Z4b4N4Mg?autoplay=1';
+  alarmScr.classList.add('on');
+}
+function dismissAlarm(){
+  alarming=false;
+  alarmScr.classList.remove('on');
+  alarmFr.src='about:blank';
+  fetch('/dismiss',{method:'POST'});
+  log('Alarma descartada.','ok');
+}
+function testAlarm(){ log('Probando alarma...','warn'); triggerAlarm(); }
+function doStart(){
+  fetch('/start',{method:'POST'}).then(()=>{
+    log('Detección iniciada.','ok');
+    if(!pollId) pollId=setInterval(pollState,200);
+  });
+}
+function doStop(){
+  fetch('/stop',{method:'POST'}).then(()=>{
+    log('Detenido.','warn');
+    if(pollId){clearInterval(pollId);pollId=null;}
+  });
+}
+window.addEventListener('load',()=>{ log('SleepGuard iniciado.','ok'); doStart(); });
+</script>
+</body>
+</html>
