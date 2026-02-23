@@ -3,7 +3,7 @@
 App Python que usa tu cámara para detectar cuando te quedas dormido
 y reproduce un video de alarma en el navegador.
 
-## Tecnologías
+## Librerías
 - **Flask** — servidor web
 - **OpenCV** — captura de cámara y dibujo
 - **MediaPipe Face Mesh** — landmarks faciales (478 puntos)
