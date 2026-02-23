@@ -1,0 +1,4 @@
+# Solo estas 3 librerías (numpy ya viene con opencv)
+flask
+opencv-python
+numpy
